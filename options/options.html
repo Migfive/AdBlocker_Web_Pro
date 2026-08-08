@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdBlocker Pro - Panel de Control & Configuración</title>
+  <link rel="stylesheet" href="options.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo-box">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <h2>AdBlocker Pro</h2>
+          <span class="subtext">Manifest V3 Edition</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="tab-dashboard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard & Stats
+        </button>
+
+        <button class="nav-item" data-tab="tab-youtube">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/>
+            <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor"/>
+          </svg>
+          Protección YouTube
+        </button>
+
+        <button class="nav-item" data-tab="tab-filters">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+          </svg>
+          Listas de Filtros
+        </button>
+
+        <button class="nav-item" data-tab="tab-whitelist">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 8 8 12 12 16"/>
+            <line x1="16" y1="12" x2="8" y2="12"/>
+          </svg>
+          Lista Blanca
+        </button>
+
+        <button class="nav-item" data-tab="tab-rules">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+          Reglas Personalizadas
+        </button>
+
+        <button class="nav-item" data-tab="tab-python">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          Entorno Python & Herramientas
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="status-indicator online">
+          <span class="dot"></span> Manifest V3 Activo
+        </span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Tab: Dashboard -->
+      <section class="tab-page active" id="tab-dashboard">
+        <div class="page-header">
+          <h1>Panel de Control & Estadísticas</h1>
+          <p>Métricas en tiempo real de anuncios bloqueados y optimización de navegación.</p>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Anuncios Bloqueados Hoy</span>
+              <span class="metric-badge green">+100%</span>
+            </div>
+            <div class="metric-value" id="dashToday">0</div>
+            <div class="metric-sub">Reiniciado diariamente</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Anuncios YouTube Saltados</span>
+              <span class="metric-badge red">Turbo</span>
+            </div>
+            <div class="metric-value" id="dashYouTube">0</div>
+            <div class="metric-sub">Publicidad en vídeo evitada</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Total Bloqueados Histórico</span>
+              <span class="metric-badge cyan">Global</span>
+            </div>
+            <div class="metric-value" id="dashTotal">0</div>
+            <div class="metric-sub">Peticiones de red + Cosmetic</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Tiempo Estimado Ahorrado</span>
+              <span class="metric-badge purple">Banda Ancha</span>
+            </div>
+            <div class="metric-value" id="dashTime">0 min</div>
+            <div class="metric-sub">Tiempo de carga evitado</div>
+          </div>
+        </div>
+
+        <div class="card shadow-lg mt-6">
+          <div class="card-header">
+            <h3>🛡️ Estado General del Motor de Bloqueo</h3>
+          </div>
+          <div class="card-body">
+            <div class="status-list">
+              <div class="status-row">
+                <span>Network Rule Engine (declarativeNetRequest)</span>
+                <span class="badge badge-success">Activo (18 Reglas Base)</span>
+              </div>
+              <div class="status-row">
+                <span>YouTube Injected Sanitizer (MAIN World)</span>
+                <span class="badge badge-success">Inyectado en document_start</span>
+              </div>
+              <div class="status-row">
+                <span>Cosmetic DOM Filter Engine</span>
+                <span class="badge badge-success">Filtrado CSS en tiempo real</span>
+              </div>
+              <div class="status-row">
+                <span>Anti-Adblock Overlay Bypass</span>
+                <span class="badge badge-success">Bypass Automático</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: YouTube Protection -->
+      <section class="tab-page" id="tab-youtube">
+        <div class="page-header">
+          <h1>Protección Avanzada para YouTube</h1>
+          <p>Configuración del motor de salto automático e instantáneo de anuncios en YouTube.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-body flex-col gap-4">
+            <div class="setting-row">
+              <div>
+                <h4 class="setting-title">🚀 Modo Turbo Auto-Skip</h4>
+                <p class="setting-desc">Detecta al instante los anuncios de vídeo de YouTube, silencia el audio y acelera la reproducción a 16x saltándolos automáticamente en menos de 50ms.</p>
+              </div>
+              <label class="toggle-sm">
+                <input type="checkbox" id="optYtTurbo" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <hr class="divider">
+
+            <div class="setting-row">
+              <div>
+                <h4 class="setting-title">🔊 Silenciado Automático de Anuncios</h4>
+                <p class="setting-desc">Mantiene en silencio absoluto el vídeo mientras dure cualquier anuncio antes de ser saltado.</p>
+              </div>
+              <label class="toggle-sm">
+                <input type="checkbox" id="optYtMute" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <hr class="divider">
+
+            <div class="setting-row">
+              <div>
+                <h4 class="setting-title">🎨 Ocultar Banners y Banners Laterales</h4>
+                <p class="setting-desc">Elimina de la interfaz de YouTube los banners promocionales en la página de inicio, resultados de búsqueda y sugeridos laterales.</p>
+              </div>
+              <label class="toggle-sm">
+                <input type="checkbox" id="optYtOverlays" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Filter Lists -->
+      <section class="tab-page" id="tab-filters">
+        <div class="page-header">
+          <h1>Listas de Filtros Suscritas</h1>
+          <p>Selecciona y gestiona los conjuntos de reglas para bloquear publicidad y rastreadores.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-body flex-col gap-4">
+            <div class="setting-row">
+              <div>
+                <h4 class="setting-title">🛡️ AdBlocker Pro Shield (YouTube & Network Rules)</h4>
+                <p class="setting-desc">Reglas nativas de alto rendimiento compiladas para Manifest V3.</p>
+              </div>
+              <span class="badge badge-success">Obligatorio</span>
+            </div>
+
+            <hr class="divider">
+
+            <div class="setting-row">
+              <div>
+                <h4 class="setting-title">🌐 Filtros Cosméticos Estándar (EasyList)</h4>
+                <p class="setting-desc">Elimina contenedores vacíos de anuncios en portales web, periódicos y blogs.</p>
+              </div>
+              <label class="toggle-sm">
+                <input type="checkbox" id="optCosmetic" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <hr class="divider">
+
+            <div class="setting-row">
+              <div>
+                <h4 class="setting-title">🚫 Detector Anti-Adblock Bypass</h4>
+                <p class="setting-desc">Evita que los sitios web bloqueen la lectura mediante popups que exigen desactivar el adblocker.</p>
+              </div>
+              <label class="toggle-sm">
+                <input type="checkbox" id="optAntiAdblock" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Whitelist -->
+      <section class="tab-page" id="tab-whitelist">
+        <div class="page-header">
+          <h1>Lista Blanca / Dominios Excluidos</h1>
+          <p>Los sitios añadidos a esta lista no tendrán ningún tipo de bloqueo de anuncios.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-body flex-col gap-4">
+            <div class="add-whitelist-box">
+              <input type="text" id="inputWhitelist" placeholder="Ejemplo: mi-sitio-favorito.com" class="input-text">
+              <button class="btn btn-primary" id="btnAddWhitelist">Añadir Dominio</button>
+            </div>
+
+            <div class="whitelist-container mt-4" id="whitelistContainer">
+              <!-- Rendered whitelist domain tags -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Custom Rules -->
+      <section class="tab-page" id="tab-rules">
+        <div class="page-header">
+          <h1>Reglas Personalizadas del Usuario</h1>
+          <p>Gestiona los elementos bloqueados manualmente con el selector o añade selectores CSS personalizados.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="rules-list" id="customRulesList">
+              <!-- Rendered custom element rules -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Python Environment & Tools -->
+      <section class="tab-page" id="tab-python">
+        <div class="page-header">
+          <h1>Entorno Python Integrado & Herramientas</h1>
+          <p>Estado del entorno virtual Python localizado en el proyecto para compilación de reglas y automatizaciones.</p>
+        </div>
+
+        <div class="card mb-6">
+          <div class="card-header">
+            <h3>🐍 Estado del Virtualenv de Python</h3>
+          </div>
+          <div class="card-body">
+            <div class="code-block">
+              <pre><code><strong>Directorio Venv:</strong> ./venv
+<strong>Versión de Python:</strong> Python 3.14.4
+<strong>Paquetes Instalados:</strong> requests, beautifulsoup4, pillow, colorama, pyyaml
+<strong>Script Compilador:</strong> python3 scripts/compile_rules.py</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>⚡ Comandos de Gestión CLI disponibles en Terminal</h3>
+          </div>
+          <div class="card-body flex-col gap-3">
+            <div class="cli-command-item">
+              <code>./venv/bin/python3 scripts/manage.py compile</code>
+              <p>Descarga los últimos filtros EasyList/YouTube y compila <code>rules.json</code> para Manifest V3.</p>
+            </div>
+
+            <div class="cli-command-item">
+              <code>./venv/bin/python3 scripts/manage.py status</code>
+              <p>Muestra el resumen de sintaxis del manifiesto y la integridad de las reglas.</p>
+            </div>
+
+            <div class="cli-command-item">
+              <code>./venv/bin/python3 scripts/manage.py test</code>
+              <p>Inicia un servidor de pruebas local en Python para simular anuncios de YouTube y evaluar bloqueos.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
