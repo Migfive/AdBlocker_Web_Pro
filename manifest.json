@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube & Web AdBlocker Pro",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Bloqueador de anuncios de alto rendimiento con salto automático e instantáneo de anuncios en YouTube (Manifest V3).",
   "icons": {
     "16": "icons/icon16.png",
@@ -11,15 +11,9 @@
   },
   "permissions": [
     "declarativeNetRequest",
-    "declarativeNetRequestWithHostAccess",
     "storage",
     "tabs",
-    "activeTab",
-    "scripting",
     "contextMenus"
-  ],
-  "host_permissions": [
-    "<all_urls>"
   ],
   "declarative_net_request": {
     "rule_resources": [
