@@ -10,20 +10,15 @@
     "128": "icons/icon128.png"
   },
   "permissions": [
-    "declarativeNetRequest",
     "storage",
     "tabs",
     "contextMenus"
   ],
-  "declarative_net_request": {
-    "rule_resources": [
-      {
-        "id": "default_rules",
-        "enabled": true,
-        "path": "rules.json"
-      }
-    ]
-  },
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "*://*.googlevideo.com/*",
+    "*://*.googleapis.com/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
@@ -35,15 +30,23 @@
   "options_page": "options/options.html",
   "content_scripts": [
     {
-      "matches": ["*://*.youtube.com/*"],
-      "js": ["content/yt_injector.js"],
+      "matches": [
+        "*://*.youtube.com/*",
+        "*://m.youtube.com/*"
+      ],
+      "js": ["content/content-script.js"],
       "run_at": "document_start",
-      "world": "MAIN"
+      "all_frames": false
     },
     {
-      "matches": ["*://*.youtube.com/*"],
-      "js": ["content/yt_adblocker.js"],
-      "run_at": "document_start"
+      "matches": [
+        "*://*.youtube.com/*",
+        "*://m.youtube.com/*"
+      ],
+      "js": ["content/injected-script.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
     },
     {
       "matches": ["<all_urls>"],
@@ -53,8 +56,8 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["content/yt_injector.js", "icons/*"],
-      "matches": ["<all_urls>"]
+      "resources": ["content/*.js", "icons/*"],
+      "matches": ["*://*.youtube.com/*"]
     }
   ]
 }
