@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusText = document.getElementById('statusText');
   const statToday = document.getElementById('statToday');
   const statYouTube = document.getElementById('statYouTube');
+  const adsBlockedCount = document.getElementById('ads-blocked-count');
   const statTimeSaved = document.getElementById('statTimeSaved');
   const btnElementPicker = document.getElementById('btnElementPicker');
   const btnToggleWhitelist = document.getElementById('btnToggleWhitelist');
@@ -38,8 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const today = res.blockedToday || 0;
       const ytCount = res.blockedYouTube || 0;
+      const totalCount = res.blockedTotal || 0;
       statToday.textContent = today.toLocaleString();
       statYouTube.textContent = ytCount.toLocaleString();
+      if (adsBlockedCount) adsBlockedCount.textContent = totalCount.toLocaleString();
 
       // Estimated time saved: 6s per YouTube ad skipped + 2s per standard ad
       const totalTimeSecs = (ytCount * 6) + (today * 2);
@@ -85,6 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     refreshUI();
+  });
+
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'local' && (changes.blockedTotal || changes.blockedToday || changes.blockedYouTube)) {
+      refreshUI();
+    }
   });
 
   // Toggle Master Switch

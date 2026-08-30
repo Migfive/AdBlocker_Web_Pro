@@ -183,8 +183,6 @@
       }
     }
 
-    reportAdBlocked();
-
     // 4. Remove anti-adblock popup overlays if YouTube shows enforcement notice
     const dismissBtn = document.querySelector('ytd-popup-container #dismiss-button, tp-yt-paper-dialog #dismiss-button, .yt-spec-button-shape-next--call-to-action');
     const enforcementPopup = document.querySelector('ytd-enforcement-message-view-model, tp-yt-paper-dialog:has(.yt-playability-error-supported-renderers)');

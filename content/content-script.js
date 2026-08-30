@@ -6,105 +6,63 @@
 
   const config = {
     enabled: true,
-    muteAds: true,
-    playbackRate: 16,
+    playbackRate: 16.0,
     pollMs: 180,
-    selectors: [
-      '.ytp-ad-skip-button',
-      '.ytp-ad-skip-button-modern',
-      '.ytp-skip-ad-button',
-      '.ytp-ad-skip-button-slot button',
-      '.ytp-ad-skip-button-container button',
-      'button.ytp-ad-skip-button-modern',
-      'button[aria-label*="Skip ad"]',
-      'button[aria-label*="Skip"]',
-      '[role="button"][aria-label*="Skip"]',
-      '[data-layer*="skip-ad"]'
-    ]
+    maxAdDuration: 600
   };
 
+  function resetVideoState(video) {
+    if (!video) return;
+    video.muted = false;
+    video.playbackRate = 1.0;
+  }
+
   function getPlayer() {
-    const directPlayer = document.querySelector('#movie_player');
-    if (directPlayer) return directPlayer;
-
-    const html5Player = document.querySelector('.html5-video-player');
-    if (html5Player) return html5Player;
-
-    const videoEl = document.querySelector('video');
-    return videoEl ? videoEl.closest('.html5-video-player') : null;
+    return document.getElementById('movie_player') || document.querySelector('.html5-video-player');
   }
 
   function getVideo() {
     const player = getPlayer();
     if (!player) return null;
 
-    const directVideo = player.querySelector('video');
-    if (directVideo) return directVideo;
+    const videoFromPlayer = player.querySelector('video');
+    if (videoFromPlayer) return videoFromPlayer;
 
-    return document.querySelector('video.html5-main-video');
+    return document.querySelector('video.html5-main-video, video');
   }
 
-  function getSkipCandidates() {
-    const results = new Set();
+  function findActiveSkipButton(player) {
+    if (!player) return null;
 
-    config.selectors.forEach((selector) => {
-      document.querySelectorAll(selector).forEach((node) => {
-        if (node instanceof HTMLElement && node.offsetParent !== null) {
-          results.add(node);
-        }
-      });
-    });
+    const skipContainers = player.querySelectorAll('.ytp-ad-skip-button-container, .ytp-ad-skip-button-modern');
 
-    document.querySelectorAll('button, [role="button"]').forEach((node) => {
-      if (!(node instanceof HTMLElement)) return;
-      if (node.offsetParent === null) return;
-
-      const text = (node.textContent || '').toLowerCase();
-      const aria = (node.getAttribute('aria-label') || '').toLowerCase();
-
-      if ((text.includes('skip') || aria.includes('skip')) && (text.includes('ad') || aria.includes('ad'))) {
-        results.add(node);
+    for (const container of skipContainers) {
+      const directButton = container.querySelector('button, .ytp-ad-skip-button, .ytp-ad-skip-button-modern');
+      if (directButton && typeof directButton.click === 'function') {
+        return directButton;
       }
-    });
 
-    return [...results];
-  }
-
-  function isAdActive(player, video) {
-    if (!player || !video) return false;
-
-    const hasAdClass =
-      player.classList.contains('ad-showing') ||
-      player.classList.contains('ad-interrupting') ||
-      player.classList.contains('ytp-ad-module');
-
-    const hasOverlay = Boolean(
-      document.querySelector('.ytp-ad-player-overlay') ||
-      document.querySelector('.ytp-ad-module') ||
-      document.querySelector('.ytp-ad-preview-container')
-    );
-
-    return Boolean(hasAdClass || hasOverlay || getSkipCandidates().length > 0);
-  }
-
-  function clickSkipButton() {
-    const candidates = getSkipCandidates();
-
-    for (const candidate of candidates) {
-      try {
-        candidate.click();
-        return true;
-      } catch (_) {
-        try {
-          candidate.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-          return true;
-        } catch (_) {
-          // ignored
-        }
+      if (container.matches('button, .ytp-ad-skip-button, .ytp-ad-skip-button-modern') && typeof container.click === 'function') {
+        return container;
       }
     }
 
-    return false;
+    const adSkipButton = player.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern');
+    if (adSkipButton && typeof adSkipButton.click === 'function') {
+      return adSkipButton;
+    }
+
+    return null;
+  }
+
+  function isActualAdState(player) {
+    if (!player) return false;
+
+    const hasAdInterrupting = player.classList.contains('ad-interrupting');
+    const hasHtml5AdSpace = player.querySelector('.html5-ad-space');
+    const hasYtpAdOverlay = player.querySelector('.ytp-ad-player-overlay');
+
+    return Boolean(hasAdInterrupting || hasHtml5AdSpace || hasYtpAdOverlay);
   }
 
   function applyFastForward() {
@@ -115,58 +73,72 @@
 
     if (!player || !video) return;
 
-    const adActive = isAdActive(player, video);
+    const isAd = isActualAdState(player);
 
-    if (!adActive) {
-      if (video.playbackRate > 4) {
-        video.playbackRate = 1;
+    if (!isAd) {
+      if (player.classList.contains('ad-interrupting')) {
+        resetVideoState(video);
+        return;
       }
 
-      if (window.__ytBypassAutoMuted && video.muted) {
+      if (video.playbackRate !== 1.0) {
+        video.playbackRate = 1.0;
+      }
+
+      if (video.muted) {
         video.muted = false;
-        window.__ytBypassAutoMuted = false;
       }
 
       return;
     }
 
-    if (config.muteAds) {
-      video.muted = true;
-      window.__ytBypassAutoMuted = true;
+    const skipButton = findActiveSkipButton(player);
+    if (skipButton && typeof skipButton.click === 'function') {
+      skipButton.click();
     }
 
+    video.muted = true;
     video.playbackRate = config.playbackRate;
 
-    if (Number.isFinite(video.duration) && video.duration > 0) {
+    if (Number.isFinite(video.duration) && video.duration > 0 && video.duration < config.maxAdDuration) {
       const target = Math.max(0, video.duration - 0.15);
       if (video.currentTime < target) {
         video.currentTime = target;
       }
-    } else {
-      video.currentTime = Number.MAX_SAFE_INTEGER;
+    }
+  }
+
+  function observerCallback() {
+    const player = getPlayer();
+    const video = getVideo();
+
+    if (!player || !video) return;
+
+    if (!isActualAdState(player)) {
+      resetVideoState(video);
+      return;
     }
 
-    clickSkipButton();
+    applyFastForward();
   }
 
   const observer = new MutationObserver(() => {
-    applyFastForward();
+    observerCallback();
   });
 
   function startMonitoring() {
-    applyFastForward();
-
     const root = document.documentElement || document.body;
     if (root) {
       observer.observe(root, {
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ['class', 'style', 'aria-label']
+        attributeFilter: ['class', 'style']
       });
     }
 
-    window.setInterval(applyFastForward, config.pollMs);
+    observerCallback();
+    window.setInterval(observerCallback, config.pollMs);
   }
 
   if (document.readyState === 'loading') {

@@ -84,27 +84,36 @@ function notifyAllTabs() {
 }
 
 // Handle Messages from Content Scripts and Popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'AD_BLOCKED') {
+let statsUpdateQueue = Promise.resolve();
+
+function recordBlockedAd(category, tabId, sendResponse) {
+  statsUpdateQueue = statsUpdateQueue.then(() => new Promise((resolve) => {
     const today = new Date().toISOString().split('T')[0];
     chrome.storage.local.get(['blockedToday', 'blockedTotal', 'blockedYouTube', 'lastResetDate'], (res) => {
       const isNewDay = res.lastResetDate !== today;
       const newToday = isNewDay ? 1 : (res.blockedToday || 0) + 1;
       const newTotal = (res.blockedTotal || 0) + 1;
-      const newYT = message.category === 'youtube' ? ((res.blockedYouTube || 0) + 1) : (res.blockedYouTube || 0);
+      const newYT = category === 'youtube' ? ((res.blockedYouTube || 0) + 1) : (res.blockedYouTube || 0);
 
       chrome.storage.local.set({
         blockedToday: newToday,
         blockedTotal: newTotal,
         blockedYouTube: newYT,
         lastResetDate: today
+      }, () => {
+        if (tabId) updateBadge(tabId, newToday);
+        sendResponse({ status: 'updated', blockedTotal: newTotal });
+        resolve();
       });
-
-      if (sender.tab && sender.tab.id) {
-        updateBadge(sender.tab.id, newToday);
-      }
     });
-    sendResponse({ status: 'updated' });
+  })).catch(() => {
+    sendResponse({ status: 'error' });
+  });
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'AD_BLOCKED') {
+    recordBlockedAd(message.category, sender.tab ? sender.tab.id : null, sendResponse);
   } else if (message.type === 'TOGGLE_WHITELIST_DOMAIN') {
     toggleWhitelistDomain(message.domain, sender.tab ? sender.tab.id : null);
     sendResponse({ status: 'toggled' });

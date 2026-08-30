@@ -64,6 +64,24 @@
     'div[data-ad-client]'
   ];
 
+  function reportAdBlocked() {
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+      chrome.runtime.sendMessage({ type: 'AD_BLOCKED', category: 'web' }, () => {
+        if (chrome.runtime.lastError) { /* ignore */ }
+      });
+    }
+  }
+
+  function markVisibleAdsAsBlocked() {
+    if (!config.enabled || !config.cosmeticFiltering) return;
+
+    document.querySelectorAll(adSelectors.join(',\n')).forEach((element) => {
+      if (element.dataset.adblockerCounted === 'true') return;
+      element.dataset.adblockerCounted = 'true';
+      reportAdBlocked();
+    });
+  }
+
   function applyCosmeticFilters() {
     if (!config.enabled || !config.cosmeticFiltering) return;
 
@@ -88,6 +106,7 @@
     }
 
     styleEl.textContent = css;
+    markVisibleAdsAsBlocked();
   }
 
   // Anti-Adblock Overlay Remover
@@ -108,7 +127,10 @@
     });
   }
 
-  setInterval(removeAntiAdblockPopups, 1000);
+  setInterval(() => {
+    removeAntiAdblockPopups();
+    markVisibleAdsAsBlocked();
+  }, 1000);
 
   // Element Picker Tool Implementation
   let pickerActive = false;
