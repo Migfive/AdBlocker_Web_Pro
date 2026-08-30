@@ -99,6 +99,38 @@
     }
   }
 
+  function removeEnforcementModals() {
+    const modalSelectors = [
+      'ytd-enforcement-message-view-model',
+      'tp-yt-paper-dialog'
+    ];
+    const modals = document.querySelectorAll(modalSelectors.join(', '));
+
+    if (modals.length === 0) return;
+
+    modals.forEach(modal => modal.remove());
+
+    const video = document.querySelector('#movie_player video, .html5-video-player video, video.html5-main-video');
+    if (video && video.paused) {
+      video.play().catch(() => {});
+    }
+  }
+
+  const enforcementObserver = new MutationObserver(() => {
+    removeEnforcementModals();
+  });
+
+  function startEnforcementObserver() {
+    removeEnforcementModals();
+    const targetNode = document.documentElement || document;
+    enforcementObserver.observe(targetNode, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  startEnforcementObserver();
+
   // YouTube Fast Skip & Mute Logic
   function handleYouTubeAds() {
     if (!config.enabled || !config.ytTurboSkip) return;

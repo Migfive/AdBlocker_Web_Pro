@@ -114,6 +114,15 @@ class CounterIntegrationTests(unittest.TestCase):
         self.assertIn("res.blockedTotal", popup)
         self.assertIn('id="ads-blocked-count"', popup_html)
 
+    def test_youtube_enforcement_modal_fallback_is_present(self):
+        youtube = read_text(ROOT / "content" / "yt_adblocker.js")
+
+        self.assertIn("ytd-enforcement-message-view-model", youtube)
+        self.assertIn("tp-yt-paper-dialog", youtube)
+        self.assertIn("new MutationObserver", youtube)
+        self.assertIn("modal.remove()", youtube)
+        self.assertIn("video.play().catch", youtube)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
