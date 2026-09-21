@@ -97,22 +97,20 @@ class CodeSecurityTests(unittest.TestCase):
 
 
 class CounterIntegrationTests(unittest.TestCase):
-    def test_content_scripts_report_blocked_ads_by_category(self):
+    def test_content_scripts_do_not_report_blocked_ad_counts(self):
         youtube = read_text(ROOT / "content" / "yt_adblocker.js")
         web = read_text(ROOT / "content" / "general_adblocker.js")
 
-        self.assertIn("type: 'AD_BLOCKED', category: 'youtube'", youtube)
-        self.assertIn("type: 'AD_BLOCKED', category: 'web'", web)
-        self.assertIn("element.dataset.adblockerCounted", web)
+        self.assertNotIn("AD_BLOCKED", youtube)
+        self.assertNotIn("AD_BLOCKED", web)
+        self.assertNotIn("adblockerCounted", web)
 
-    def test_background_persists_total_and_popup_reads_it(self):
+    def test_background_only_handles_whitelist_and_setting_messages(self):
         background = read_text(ROOT / "background.js")
-        popup = read_text(ROOT / "popup" / "popup.js")
-        popup_html = read_text(ROOT / "popup" / "popup.html")
 
-        self.assertIn("blockedTotal: newTotal", background)
-        self.assertIn("res.blockedTotal", popup)
-        self.assertIn('id="ads-blocked-count"', popup_html)
+        self.assertNotIn("AD_BLOCKED", background)
+        self.assertIn("TOGGLE_WHITELIST_DOMAIN", background)
+        self.assertIn("SETTINGS_UPDATED", background)
 
     def test_youtube_enforcement_modal_fallback_is_present(self):
         youtube = read_text(ROOT / "content" / "yt_adblocker.js")

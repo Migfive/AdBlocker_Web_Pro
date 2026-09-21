@@ -4,10 +4,8 @@
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.get([
     'enabled', 'ytTurboSkip', 'ytAutoMute', 'ytRemoveOverlays',
-    'cosmeticFiltering', 'antiAdblockBypass', 'blockedToday',
-    'blockedTotal', 'blockedYouTube', 'whitelist', 'customRules', 'lastResetDate'
+    'cosmeticFiltering', 'antiAdblockBypass', 'whitelist', 'customRules'
   ], (res) => {
-    const today = new Date().toISOString().split('T')[0];
     const defaults = {
       enabled: res.enabled !== undefined ? res.enabled : true,
       ytTurboSkip: res.ytTurboSkip !== undefined ? res.ytTurboSkip : true,
@@ -15,10 +13,6 @@ chrome.runtime.onInstalled.addListener(() => {
       ytRemoveOverlays: res.ytRemoveOverlays !== undefined ? res.ytRemoveOverlays : true,
       cosmeticFiltering: res.cosmeticFiltering !== undefined ? res.cosmeticFiltering : true,
       antiAdblockBypass: res.antiAdblockBypass !== undefined ? res.antiAdblockBypass : true,
-      blockedToday: res.lastResetDate === today ? (res.blockedToday || 0) : 0,
-      blockedTotal: res.blockedTotal || 0,
-      blockedYouTube: res.blockedYouTube || 0,
-      lastResetDate: today,
       whitelist: res.whitelist || [],
       customRules: res.customRules || []
     };
@@ -84,37 +78,8 @@ function notifyAllTabs() {
 }
 
 // Handle Messages from Content Scripts and Popup
-let statsUpdateQueue = Promise.resolve();
-
-function recordBlockedAd(category, tabId, sendResponse) {
-  statsUpdateQueue = statsUpdateQueue.then(() => new Promise((resolve) => {
-    const today = new Date().toISOString().split('T')[0];
-    chrome.storage.local.get(['blockedToday', 'blockedTotal', 'blockedYouTube', 'lastResetDate'], (res) => {
-      const isNewDay = res.lastResetDate !== today;
-      const newToday = isNewDay ? 1 : (res.blockedToday || 0) + 1;
-      const newTotal = (res.blockedTotal || 0) + 1;
-      const newYT = category === 'youtube' ? ((res.blockedYouTube || 0) + 1) : (res.blockedYouTube || 0);
-
-      chrome.storage.local.set({
-        blockedToday: newToday,
-        blockedTotal: newTotal,
-        blockedYouTube: newYT,
-        lastResetDate: today
-      }, () => {
-        if (tabId) updateBadge(tabId, newToday);
-        sendResponse({ status: 'updated', blockedTotal: newTotal });
-        resolve();
-      });
-    });
-  })).catch(() => {
-    sendResponse({ status: 'error' });
-  });
-}
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'AD_BLOCKED') {
-    recordBlockedAd(message.category, sender.tab ? sender.tab.id : null, sendResponse);
-  } else if (message.type === 'TOGGLE_WHITELIST_DOMAIN') {
+  if (message.type === 'TOGGLE_WHITELIST_DOMAIN') {
     toggleWhitelistDomain(message.domain, sender.tab ? sender.tab.id : null);
     sendResponse({ status: 'toggled' });
   } else if (message.type === 'SETTINGS_UPDATED') {
@@ -123,12 +88,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   return true;
 });
-
-// Badge update helper
-function updateBadge(tabId, count) {
-  chrome.action.setBadgeBackgroundColor({ color: '#0284c7', tabId: tabId });
-  chrome.action.setBadgeText({ text: count > 0 ? String(count) : '', tabId: tabId });
-}
 
 console.log('[AdBlocker Pro] Background Service Worker Loaded.');
  

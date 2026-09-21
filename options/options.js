@@ -35,18 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function loadSettings() {
     chrome.storage.local.get([
       'enabled', 'ytTurboSkip', 'ytAutoMute', 'ytRemoveOverlays',
-      'cosmeticFiltering', 'antiAdblockBypass', 'blockedToday',
-      'blockedTotal', 'blockedYouTube', 'whitelist', 'customRules'
+      'cosmeticFiltering', 'antiAdblockBypass', 'whitelist', 'customRules'
     ], (res) => {
-      const today = res.blockedToday || 0;
-      const yt = res.blockedYouTube || 0;
-      const total = res.blockedTotal || 0;
-      const timeSecs = (yt * 6) + (today * 2);
-
-      dashToday.textContent = today.toLocaleString();
-      dashYouTube.textContent = yt.toLocaleString();
-      dashTotal.textContent = total.toLocaleString();
-      dashTime.textContent = `${Math.floor(timeSecs / 60)} min`;
+      dashToday.textContent = '0';
+      dashYouTube.textContent = '0';
+      dashTotal.textContent = '0';
+      dashTime.textContent = '0 min';
 
       optYtTurbo.checked = res.ytTurboSkip !== undefined ? res.ytTurboSkip : true;
       optYtMute.checked = res.ytAutoMute !== undefined ? res.ytAutoMute : true;

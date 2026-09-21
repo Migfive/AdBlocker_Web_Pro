@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusText = document.getElementById('statusText');
   const statToday = document.getElementById('statToday');
   const statYouTube = document.getElementById('statYouTube');
-  const adsBlockedCount = document.getElementById('ads-blocked-count');
   const statTimeSaved = document.getElementById('statTimeSaved');
   const btnElementPicker = document.getElementById('btnElementPicker');
   const btnToggleWhitelist = document.getElementById('btnToggleWhitelist');
@@ -29,24 +28,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load state and statistics
   function refreshUI() {
     chrome.storage.local.get([
-      'enabled', 'ytTurboSkip', 'ytAutoMute', 'blockedToday',
-      'blockedYouTube', 'whitelist'
+      'enabled', 'ytTurboSkip', 'ytAutoMute', 'whitelist'
     ], (res) => {
       const isEnabled = res.enabled !== undefined ? res.enabled : true;
       masterToggle.checked = isEnabled;
       ytTurboToggle.checked = res.ytTurboSkip !== undefined ? res.ytTurboSkip : true;
       ytMuteToggle.checked = res.ytAutoMute !== undefined ? res.ytAutoMute : true;
 
-      const today = res.blockedToday || 0;
-      const ytCount = res.blockedYouTube || 0;
-      const totalCount = res.blockedTotal || 0;
-      statToday.textContent = today.toLocaleString();
-      statYouTube.textContent = ytCount.toLocaleString();
-      if (adsBlockedCount) adsBlockedCount.textContent = totalCount.toLocaleString();
-
-      // Estimated time saved: 6s per YouTube ad skipped + 2s per standard ad
-      const totalTimeSecs = (ytCount * 6) + (today * 2);
-      statTimeSaved.textContent = formatTime(totalTimeSecs);
+      statToday.textContent = '0';
+      statYouTube.textContent = '0';
+      statTimeSaved.textContent = '0s';
 
       const whitelist = res.whitelist || [];
       const isWhitelisted = currentDomain && whitelist.some(d => currentDomain.includes(d));
@@ -90,11 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshUI();
   });
 
-  chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName === 'local' && (changes.blockedTotal || changes.blockedToday || changes.blockedYouTube)) {
-      refreshUI();
-    }
-  });
 
   // Toggle Master Switch
   masterToggle.addEventListener('change', () => {

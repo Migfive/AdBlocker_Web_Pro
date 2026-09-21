@@ -64,21 +64,12 @@
     'div[data-ad-client]'
   ];
 
-  function reportAdBlocked() {
-    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-      chrome.runtime.sendMessage({ type: 'AD_BLOCKED', category: 'web' }, () => {
-        if (chrome.runtime.lastError) { /* ignore */ }
-      });
-    }
-  }
-
   function markVisibleAdsAsBlocked() {
     if (!config.enabled || !config.cosmeticFiltering) return;
 
     document.querySelectorAll(adSelectors.join(',\n')).forEach((element) => {
-      if (element.dataset.adblockerCounted === 'true') return;
-      element.dataset.adblockerCounted = 'true';
-      reportAdBlocked();
+      if (element.dataset.adblockerHidden === 'true') return;
+      element.dataset.adblockerHidden = 'true';
     });
   }
 

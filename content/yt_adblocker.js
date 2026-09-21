@@ -87,17 +87,6 @@
   // Skip ad state tracker
   let lastAdSkippedTime = 0;
 
-  function reportAdBlocked() {
-    const now = Date.now();
-    if (now - lastAdSkippedTime > 1500) {
-      lastAdSkippedTime = now;
-      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-        chrome.runtime.sendMessage({ type: 'AD_BLOCKED', category: 'youtube' }, () => {
-          if (chrome.runtime.lastError) { /* ignore */ }
-        });
-      }
-    }
-  }
 
   function removeEnforcementModals() {
     const modalSelectors = [
